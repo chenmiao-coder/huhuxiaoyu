@@ -1519,6 +1519,11 @@ function toggleDebug() {
                                     const parsed = JSON.parse(data);
                                     console.log('SSE 数据:', parsed);
                                     
+                                    // 显示原始数据
+                                    if (debugDiv) {
+                                        debugDiv.innerHTML += '<pre style="background:#000;color:#ff0;padding:10px;margin:5px 0;font-size:10px;">SSE: ' + JSON.stringify(parsed).substring(0, 200) + '</pre>';
+                                    }
+                                    
                                     if (parsed.error_code) {
                                         throw new Error(`工作流错误 ${parsed.error_code}: ${parsed.error_message}`);
                                     }
@@ -1526,14 +1531,21 @@ function toggleDebug() {
                                     // 提取内容
                                     if (parsed.data) {
                                         fullContent += parsed.data;
+                                        if (debugDiv) debugDiv.innerHTML += '<pre style="background:#000;color:#0f0;padding:10px;margin:5px 0;font-size:12px;">✓ 从 data 字段提取</pre>';
                                     } else if (parsed.content) {
                                         fullContent += parsed.content;
+                                        if (debugDiv) debugDiv.innerHTML += '<pre style="background:#000;color:#0f0;padding:10px;margin:5px 0;font-size:12px;">✓ 从 content 字段提取</pre>';
                                     } else if (parsed.output) {
                                         fullContent += parsed.output;
+                                        if (debugDiv) debugDiv.innerHTML += '<pre style="background:#000;color:#0f0;padding:10px;margin:5px 0;font-size:12px;">✓ 从 output 字段提取</pre>';
                                     } else if (parsed.final_result) {
                                         fullContent += parsed.final_result;
+                                        if (debugDiv) debugDiv.innerHTML += '<pre style="background:#000;color:#0f0;padding:10px;margin:5px 0;font-size:12px;">✓ 从 final_result 字段提取</pre>';
                                     } else if (typeof parsed === 'string') {
                                         fullContent += parsed;
+                                        if (debugDiv) debugDiv.innerHTML += '<pre style="background:#000;color:#0f0;padding:10px;margin:5px 0;font-size:12px;">✓ 从字符串提取</pre>';
+                                    } else {
+                                        if (debugDiv) debugDiv.innerHTML += '<pre style="background:#000;color:#f00;padding:10px;margin:5px 0;font-size:12px;"> 未找到内容字段</pre>';
                                     }
                                 } catch (e) {
                                     if (e.message.includes('工作流错误')) {
