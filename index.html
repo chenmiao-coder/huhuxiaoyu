@@ -995,7 +995,7 @@
             <h3>⚙️ 配置 <small style="color:#666;font-size:0.7em;">(已内置)</small></h3>
             <div class="config-group">
                 <label>API URL</label>
-                <input type="text" id="apiUrl" value="https://api.coze.cn/v1/workflow/run" readonly style="opacity:0.6;cursor:not-allowed;">
+                <input type="text" id="apiUrl" value="已内置" readonly style="opacity:0.6;cursor:not-allowed;">
             </div>
             <div class="config-group">
                 <label>API Token</label>
@@ -1190,8 +1190,8 @@
                     video: { width: 640, height: 480 } 
                 });
                 
-                const url = URL.createObjectURL(stream);
-                await setupVideo(url, stream);
+                await setupVideo(null, stream);
+
             } catch (error) {
                 console.error('摄像头访问失败:', error);
                 alert('无法访问摄像头: ' + error.message);
