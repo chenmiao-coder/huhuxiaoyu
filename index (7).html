@@ -979,7 +979,16 @@
             }
         }
     </style>
-</head>
+<button id="debugBtn" onclick="toggleDebug()" style="position:fixed;top:10px;right:10px;z-index:1000;background:#9c27b0;color:white;border:none;padding:8px 15px;border-radius:5px;font-size:14px;cursor:pointer;">调试</button>
+
+<div id="debugInfo" style="display:none;position:fixed;top:50px;right:10px;z-index:1000;width:400px;max-height:300px;overflow-y:auto;background:#1a1a1a;border:2px solid #9c27b0;border-radius:10px;padding:10px;"></div>
+
+<script>
+function toggleDebug() {
+    const debugDiv = document.getElementById('debugInfo');
+    debugDiv.style.display = debugDiv.style.display === 'none' ? 'block' : 'none';
+}
+</script></head>
 <body>
     <div class="header">
         <h1>🦴 股骨颈骨折术后康复 AI动作纠正</h1>
@@ -1190,14 +1199,8 @@
                     video: { width: 640, height: 480 } 
                 });
                 
-                // 直接使用 srcObject，不用 createObjectURL
-                await setupVideo(null, stream);
-                
-                // 启用分析按钮
-                const analyzeBtn = document.getElementById('analyzeBtn');
-                if (analyzeBtn) {
-                    analyzeBtn.disabled = false;
-                }
+                const url = URL.createObjectURL(stream);
+                await setupVideo(url, stream);
             } catch (error) {
                 console.error('摄像头访问失败:', error);
                 alert('无法访问摄像头: ' + error.message);
@@ -1228,11 +1231,7 @@
             
             // 创建视频元素
             videoElement = document.createElement('video');
-            if (stream) {
-                videoElement.srcObject = stream;
-            } else if (url) {
-                videoElement.src = url;
-            }
+            videoElement.src = url;
             videoElement.autoplay = true;
             videoElement.playsInline = true;
             videoElement.muted = true;
@@ -1410,6 +1409,11 @@
 
         // ========== AI 分析 ==========
         window.analyzeMovement = async function() {
+            const debugDiv = document.getElementById('debugInfo');
+            if (debugDiv) {
+                debugDiv.style.display = 'block';
+                debugDiv.innerHTML = '<pre style="background:#000;color:#0f0;padding:10px;margin:5px 0;font-size:12px;">开始调用 API...</pre>';
+            }
             const btn = document.getElementById('analyzeBtn');
             const resultDiv = document.getElementById('aiResult');
             
@@ -1425,7 +1429,7 @@
             `;
             
             const apiUrl = document.getElementById('apiUrl').value;
-            const apiToken = document.getElementById('apiToken').value;
+            const apiToken = 'pat_wUAWsHqO8HYNH742HDcTMtZdGf488pzJ0eU1Ual9wEW5AwSFrEm5d7YZ5tRheJaX';
             const workflowId = document.getElementById('workflowId').value;
             
             if (!apiToken) {
@@ -1461,6 +1465,11 @@
                 debugDiv.innerHTML += '<pre style="background:#000;color:#0f0;padding:10px;margin:5px 0;font-size:12px;">Token: ' + apiToken.substring(0, 20) + '...</pre>';
             }
             
+            if (debugDiv) {
+                debugDiv.innerHTML += '<pre style="background:#000;color:#0f0;padding:10px;margin:5px 0;font-size:12px;">API URL: ' + apiUrl + '</pre>';
+                debugDiv.innerHTML += '<pre style="background:#000;color:#0f0;padding:10px;margin:5px 0;font-size:12px;">Token: ' + apiToken.substring(0, 20) + '...</pre>';
+            }
+            
             const response = await fetch(apiUrl, {
                     method: 'POST',
                     headers: {
@@ -1482,6 +1491,10 @@
                 debugDiv.innerHTML += '<pre style="background:#000;color:#0f0;padding:10px;margin:5px 0;font-size:12px;">响应状态：' + response.status + '</pre>';
             }
             
+            if (debugDiv) {
+                debugDiv.innerHTML += '<pre style="background:#000;color:#0f0;padding:10px;margin:5px 0;font-size:12px;">响应状态：' + response.status + '</pre>';
+            }
+            
             if (!response.ok) {
                     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
                 }
@@ -1490,10 +1503,6 @@
                 const reader = response.body.getReader();
                 const decoder = new TextDecoder();
                 let fullContent = '';
-                                    const debugDiv = document.getElementById('debugInfo');
-                                    if (debugDiv) {
-                                        debugDiv.innerHTML = '<pre style="background:#000;color:#0f0;padding:10px;margin:5px 0;font-size:12px;">开始接收数据...</pre>';
-                                    }
                 
                 while (true) {
                     const { done, value } = await reader.read();
@@ -1509,14 +1518,6 @@
                                 try {
                                     const parsed = JSON.parse(data);
                                     console.log('SSE 数据:', parsed);
-                                    if (debugDiv) {
-                                        debugDiv.innerHTML += '<pre style="background:#000;color:#0f0;padding:10px;margin:5px 0;font-size:12px;">原始数据：' + JSON.stringify(parsed, null, 2) + '</pre>';
-                                    }
-                                    // 调试：显示在页面上
-                                    const debugDiv = document.getElementById('debugInfo');
-                                    if (debugDiv) {
-                                        debugDiv.innerHTML += '<pre style="background:#000;color:#0f0;padding:10px;margin:5px 0;font-size:12px;">' + JSON.stringify(parsed, null, 2) + '</pre>';
-                                    }
                                     
                                     if (parsed.error_code) {
                                         throw new Error(`工作流错误 ${parsed.error_code}: ${parsed.error_message}`);
@@ -1545,10 +1546,7 @@
                     }
                 }
                 
-                if (debugDiv) {
-                                        debugDiv.innerHTML += '<pre style="background:#000;color:#ff0;padding:10px;margin:5px 0;font-size:12px;">最终内容：' + (fullContent || '空') + '</pre>';
-                                    }
-                                    if (fullContent) {
+                if (fullContent) {
                     // 尝试美化显示
                     try {
                         const parsed = JSON.parse(fullContent);
