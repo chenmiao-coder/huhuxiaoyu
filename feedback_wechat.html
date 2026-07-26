@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="format-detection" content="telephone=no">
+    <title>护髋小愈 - 用户反馈</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .form-container {
+            background: white;
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 14px;
+            color: #333;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .required::after {
+            content: ' *';
+            color: #ff4d4f;
+        }
+
+        input[type="text"],
+        input[type="tel"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .radio-group,
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .radio-item,
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .radio-item input,
+        .checkbox-item input {
+            width: 18px;
+            height: 18px;
+        }
+
+        .rating {
+            display: flex;
+            gap: 8px;
+            font-size: 28px;
+        }
+
+        .star {
+            cursor: pointer;
+            color: #ddd;
+            transition: color 0.2s;
+        }
+
+        .star.active {
+            color: #ffa500;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .submit-btn:active {
+            transform: scale(0.98);
+        }
+
+        .success-message {
+            display: none;
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .success-icon {
+            font-size: 64px;
+            color: #52c41a;
+            margin-bottom: 16px;
+        }
+
+        .success-message h2 {
+            color: #333;
+            margin-bottom: 12px;
+        }
+
+        .success-message p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .tip {
+            background: #fff7e6;
+            border-left: 4px solid #ffa500;
+            padding: 12px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🦴 护髋小愈</h1>
+        <p>用户反馈表单</p>
+    </div>
+
+    <div class="form-container">
+        <div class="tip">
+            💡 您的反馈对我们非常重要，帮助我们不断改进产品体验！
+        </div>
+
+        <form id="feedbackForm">
+            <div class="form-group">
+                <label class="required">您的身份</label>
+                <div class="radio-group">
+                    <label class="radio-item">
+                        <input type="radio" name="role" value="patient" required> 患者
+                    </label>
+                    <label class="radio-item">
+                        <input type="radio" name="role" value="family"> 家属
+                    </label>
+                    <label class="radio-item">
+                        <input type="radio" name="role" value="doctor"> 医生/康复师
+                    </label>
+                    <label class="radio-item">
+                        <input type="radio" name="role" value="other"> 其他
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>术后阶段（选填）</label>
+                <select name="stage">
+                    <option value="">请选择</option>
+                    <option value="1-2weeks">术后 1-2 周</option>
+                    <option value="3-6weeks">术后 3-6 周</option>
+                    <option value="6-12weeks">术后 6-12 周</option>
+                    <option value="3months+">术后 3 个月以上</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label class="required">整体满意度</label>
+                <div class="rating" id="rating">
+                    <span class="star" data-value="1">★</span>
+                    <span class="star" data-value="2">★</span>
+                    <span class="star" data-value="3">★</span>
+                    <span class="star" data-value="4">★</span>
+                    <span class="star" data-value="5">★</span>
+                </div>
+                <input type="hidden" name="rating" id="ratingValue" required>
+            </div>
+
+            <div class="form-group">
+                <label class="required">您最常用的功能</label>
+                <div class="checkbox-group">
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="features" value="ai_analysis"> AI 动作分析
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="features" value="danger_warning"> 危险预警
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="features" value="voice_guide"> 语音指导
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="features" value="progress_tracking"> 进度追踪
+                    </label>
+                    <label class="checkbox-item">
+                        <input type="checkbox" name="features" value="training_plan"> 训练计划
+                    </label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>您觉得哪里做得好？</label>
+                <textarea name="pros" placeholder="请分享您觉得产品做得好的地方..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>您觉得哪里需要改进？</label>
+                <textarea name="cons" placeholder="请告诉我们需要改进的地方..."></textarea>
+            </div>
+
+            <div class="form-group">
+                <label>其他建议（选填）</label>
+                <textarea name="suggestions" placeholder="任何建议都欢迎..."></textarea>
+            </div>
+
+            <button type="submit" class="submit-btn">提交反馈</button>
+        </form>
+
+        <div class="success-message" id="successMessage">
+            <div class="success-icon">✓</div>
+            <h2>提交成功！</h2>
+            <p>感谢您的宝贵反馈，我们会认真阅读并持续改进产品。</p>
+            <p style="margin-top: 16px; color: #999; font-size: 12px;">您可以关闭此页面</p>
+        </div>
+    </div>
+
+    <script>
+        // 星级评分
+        const stars = document.querySelectorAll('.star');
+        const ratingValue = document.getElementById('ratingValue');
+        let currentRating = 0;
+
+        stars.forEach(star => {
+            star.addEventListener('click', () => {
+                currentRating = parseInt(star.dataset.value);
+                ratingValue.value = currentRating;
+                updateStars();
+            });
+
+            star.addEventListener('mouseenter', () => {
+                const value = parseInt(star.dataset.value);
+                stars.forEach((s, index) => {
+                    s.style.color = index < value ? '#ffa500' : '#ddd';
+                });
+            });
+        });
+
+        document.getElementById('rating').addEventListener('mouseleave', () => {
+            updateStars();
+        });
+
+        function updateStars() {
+            stars.forEach((star, index) => {
+                star.classList.toggle('active', index < currentRating);
+            });
+        }
+
+        // 表单提交
+        document.getElementById('feedbackForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const formData = new FormData(e.target);
+            const data = {
+                timestamp: new Date().toISOString(),
+                role: formData.get('role'),
+                stage: formData.get('stage') || '',
+                rating: parseInt(formData.get('rating')),
+                features: formData.getAll('features'),
+                pros: formData.get('pros') || '',
+                cons: formData.get('cons') || '',
+                suggestions: formData.get('suggestions') || ''
+            };
+
+            // 保存到 localStorage
+            let feedbacks = JSON.parse(localStorage.getItem('feedbacks') || '[]');
+            feedbacks.push(data);
+            localStorage.setItem('feedbacks', JSON.stringify(feedbacks));
+
+            // 显示成功消息
+            document.getElementById('feedbackForm').style.display = 'none';
+            document.querySelector('.tip').style.display = 'none';
+            document.getElementById('successMessage').classList.add('show');
+
+            console.log('反馈已保存：', data);
+        });
+    </script>
+</body>
+</html>
