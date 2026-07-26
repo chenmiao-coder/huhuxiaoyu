@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>股骨颈康复 AI动作纠正 Demo</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f0f1a; color: #e0e0e0; min-height: 100vh; }
+        
+        .header {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 15px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #2a2a4a;
+        }
+        .header h1 {
+            font-size: 1.4em;
+            background: linear-gradient(90deg, #4ecdc4, #44a08d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .header .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85em;
+            color: #888;
+        }
+        .status-dot {
+            width: 8px; height: 8px;
+            border-radius: 50%;
+            background: #555;
+        }
+        .status-dot.active { background: #4ecdc4; animation: pulse 1.5s infinite; }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .main-container {
+            display: grid;
+            grid-template-columns: 280px 1fr 320px;
+            gap: 0;
+            height: calc(100vh - 60px);
+        }
+
+        /* 左侧配置面板 */
+        .config-panel {
+            background: #1a1a2e;
+            padding: 20px;
+            overflow-y: auto;
+            border-right: 1px solid #2a2a4a;
+        }
+        .config-panel h3 {
+            color: #4ecdc4;
+            margin-bottom: 15px;
+            font-size: 1em;
+        }
+        .config-group {
+            margin-bottom: 15px;
+        }
+        .config-group label {
+            display: block;
+            font-size: 0.8em;
+            color: #999;
+            margin-bottom: 5px;
+        }
+        .config-group input {
+            width: 100%;
+            padding: 8px 10px;
+            background: #0f0f1a;
+            border: 1px solid #333;
+            border-radius: 6px;
+            color: #e0e0e0;
+            font-size: 0.85em;
+        }
+        .config-group input:focus {
+            outline: none;
+            border-color: #4ecdc4;
+        }
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 10px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #4ecdc4, #44a08d);
+            color: white;
+            font-weight: bold;
+        }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 15px rgba(78,205,196,0.3); }
+        .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+        .btn-secondary {
+            background: #2a2a4a;
+            color: #ccc;
+        }
+        .btn-secondary:hover { background: #333; }
+        .btn-save {
+            background: #333;
+            color: #aaa;
+            font-size: 0.8em;
+            padding: 7px;
+        }
+
+        /* 中间视频区域 */
+        .video-area {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: #12121f;
+            position: relative;
+            padding: 20px;
+        }
+        .video-wrapper {
+            position: relative;
+            max-width: 100%;
+            max-height: calc(100vh - 160px);
+        }
+        #videoElement {
+            max-width: 100%;
+            max-height: calc(100vh - 160px);
+            border-radius: 12px;
+            background: #000;
+        }
+        #poseCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        .video-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        .video-controls .btn {
+            width: auto;
+            padding: 8px 20px;
+            margin: 0;
+        }
+        .upload-area {
+            border: 2px dashed #333;
+            border-radius: 12px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .upload-area:hover { border-color: #4ecdc4; }
+        .upload-area p { color: #666; margin-top: 10px; }
+        .upload-area .icon { font-size: 2.5em; }
+        #fileInput { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; pointer-events: none; }
+
+        /* 右侧信息面板 */
+        .info-panel {
+            background: #1a1a2e;
+            padding: 20px;
+            overflow-y: auto;
+            border-left: 1px solid #2a2a4a;
+        }
+        .info-panel h3 {
+            color: #4ecdc4;
+            margin-bottom: 12px;
+            font-size: 1em;
+        }
+        .info-card {
+            background: #0f0f1a;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 12px;
+            border: 1px solid #2a2a4a;
+        }
+        .info-card h4 {
+            font-size: 0.85em;
+            color: #888;
+            margin-bottom: 8px;
+        }
+        .angle-display {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .angle-item {
+            text-align: center;
+            flex: 1;
+        }
+        .angle-value {
+            font-size: 1.8em;
+            font-weight: bold;
+            line-height: 1;
+        }
+        .angle-label {
+            font-size: 0.7em;
+            color: #888;
+            margin-top: 4px;
+        }
+        .angle-safe { color: #4ecdc4; }
+        .angle-warn { color: #f39c12; }
+        .angle-danger { color: #e74c3c; }
+
+        .result-area {
+            min-height: 150px;
+            max-height: 300px;
+            overflow-y: auto;
+            line-height: 1.6;
+            font-size: 0.85em;
+        }
+        .result-area .error {
+            color: #e74c3c;
+            background: rgba(231,76,60,0.1);
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(231,76,60,0.3);
+        }
+        .result-area .loading {
+            color: #f39c12;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .spinner {
+            width: 16px; height: 16px;
+            border: 2px solid #f39c12;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .result-content {
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .result-content p { margin-bottom: 8px; }
+
+        .config-toggle {
+            display: none;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #4ecdc4;
+            color: white;
+            border: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            z-index: 100;
+            box-shadow: 0 4px 15px rgba(78,205,196,0.4);
+        }
+
+        @media (max-width: 900px) {
+            .main-container {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto 1fr auto;
+            }
+            .config-panel { display: none; }
+            .config-panel.show { display: block; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 99; }
+            .config-toggle { display: block; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🦴 股骨颈康复 AI动作纠正 Demo</h1>
+        <div class="status">
+            <div class="status-dot" id="statusDot"></div>
+            <span id="statusText">未检测</span>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <!-- 左侧：配置 -->
+        <div class="config-panel" id="configPanel">
+            <h3>⚙️ API 配置</h3>
+            <div class="config-group">
+                <label>API 地址</label>
+                <input type="text" id="apiUrl" value="https://api.coze.cn/v1/workflow/stream_run" placeholder="API地址">
+            </div>
+            <div class="config-group">
+                <label>API Token / Key</label>
+                <input type="password" id="apiToken" placeholder="输入PAT令牌" readonly onfocus="this.blur()">
+            </div>
+            <div class="config-group">
+                <label>工作流 ID</label>
+                <input type="text" id="workflowId" placeholder="输入工作流ID">
+            </div>
+            <button class="btn btn-save" onclick="saveConfig()">💾 保存配置</button>
+            
+            <hr style="border-color:#2a2a4a; margin: 20px 0;">
+            
+            <h3>📹 视频输入</h3>
+            <div id="uploadArea" class="upload-area" onclick="triggerFileInput()">
+                <div class="icon">📁</div>
+                <p>点击上传康复训练视频</p>
+                <p style="font-size:0.75em; color:#555;">支持 MP4, WebM 格式</p>
+            </div>
+            <button class="btn btn-secondary" style="width:100%; margin-top:8px;" onclick="triggerFileInput()">📁 选择视频文件</button>
+            <input type="file" id="fileInput" accept="video/*" onchange="handleFileUpload(event)">
+            
+            <div id="videoSourceBtns" style="display:none; margin-top:10px;">
+                <button class="btn btn-secondary" onclick="switchToCamera()">📷 切换摄像头</button>
+                <button class="btn btn-secondary" onclick="resetVideo()">🔄 重新上传</button>
+            </div>
+            <div id="cameraBtn" style="margin-top:10px;">
+                <button class="btn btn-secondary" onclick="startCamera()">📷 使用摄像头</button>
+            </div>
+        </div>
+
+        <!-- 中间：视频 -->
+        <div class="video-area">
+            <div id="videoContainer">
+                <div class="upload-area" onclick="triggerFileInput()">
+                    <div class="icon">🎬</div>
+                    <p>上传视频或开启摄像头开始检测</p>
+                </div>
+            </div>
+            <div id="videoControls" class="video-controls" style="display:none;">
+                <button class="btn btn-secondary" onclick="togglePlayback()" id="playBtn">⏸️ 暂停</button>
+                <button class="btn btn-primary" onclick="analyzeWithAI()" id="analyzeBtn" disabled>🤖 AI康复指导</button>
+            </div>
+        </div>
+
+        <!-- 右侧：信息 -->
+        <div class="info-panel">
+            <h3>🦿 姿态识别</h3>
+            <div class="info-card">
+                <h4>实时髋关节角度</h4>
+                <div class="angle-display">
+                    <div class="angle-item">
+                        <div class="angle-value angle-safe" id="leftHipAngle">--°</div>
+                        <div class="angle-label">左腿</div>
+                    </div>
+                    <div class="angle-item">
+                        <div class="angle-value angle-safe" id="rightHipAngle">--°</div>
+                        <div class="angle-label">右腿</div>
+                    </div>
+                </div>
+            </div>
+            <div class="info-card">
+                <h4>实时膝关节角度</h4>
+                <div class="angle-display">
+                    <div class="angle-item">
+                        <div class="angle-value angle-safe" id="leftKneeAngle">--°</div>
+                        <div class="angle-label">左腿</div>
+                    </div>
+                    <div class="angle-item">
+                        <div class="angle-value angle-safe" id="rightKneeAngle">--°</div>
+                        <div class="angle-label">右腿</div>
+                    </div>
+                </div>
+            </div>
+            <div class="info-card" id="dangerCard" style="display:none;">
+                <h4>⚠️ 危险提示</h4>
+                <div id="dangerContent" style="color: #e74c3c; font-size: 0.85em;"></div>
+            </div>
+
+            <h3 style="margin-top:20px;">🤖 AI分析结果</h3>
+            <div class="info-card">
+                <div class="result-area" id="aiResult">
+                    <p style="color:#666;">上传视频后点击「AI康复指导」获取分析</p>
+                </div>
+                <button id="speakBtn" style="display:none; margin-top:12px; padding:8px 16px; background:linear-gradient(135deg,#f39c12,#e67e22); border:none; border-radius:8px; color:white; cursor:pointer; font-size:0.85em;" onclick="speakResult()">🔊 语音播报</button>
+            </div>
+        </div>
+    </div>
+
+    <button class="config-toggle" onclick="toggleConfig()">⚙️</button>
+
+    <script type="module">
+        import { PoseLandmarker, FilesetResolver, DrawingUtils } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14";
+
+        // ========== 全局状态 ==========
+        let poseLandmarker = null;
+        let videoElement = null;
+        let canvasElement = null;
+        let canvasCtx = null;
+        let animationFrameId = null;
+        let isRunning = false;
+        let analysisData = { frames: [], summary: {} };
+        let frameCount = 0;
+        let lastAnalysisData = null;
+
+        // ========== 初始化 MediaPipe ==========
+        async function initPoseLandmarker() {
+            const statusDot = document.getElementById('statusDot');
+            const statusText = document.getElementById('statusText');
+            statusText.textContent = '加载中...';
+
+            try {
+                const vision = await FilesetResolver.forVisionTasks(
+                    "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14/wasm"
+                );
+                poseLandmarker = await PoseLandmarker.createFromOptions(vision, {
+                    baseOptions: {
+                        modelAssetPath: "https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task",
+                        delegate: "GPU"
+                    },
+                    runningMode: "VIDEO",
+                    numPoses: 1,
+                    minPoseDetectionConfidence: 0.5,
+                    minPosePresenceConfidence: 0.5,
+                    minTrackingConfidence: 0.5
+                });
+                statusText.textContent = '就绪';
+                console.log('MediaPipe PoseLandmarker 初始化完成');
+            } catch (err) {
+                console.error('初始化失败:', err);
+                statusText.textContent = '初始化失败';
+            }
+        }
+        initPoseLandmarker();
+
+        // ========== 角度计算 ==========
+        function calcAngle(a, b, c) {
+            const ab = { x: a.x - b.x, y: a.y - b.y };
+            const cb = { x: c.x - b.x, y: c.y - b.y };
+            const dot = ab.x * cb.x + ab.y * cb.y;
+            const cross = ab.x * cb.y - ab.y * cb.x;
+            let angle = Math.atan2(Math.abs(cross), dot) * (180 / Math.PI);
+            return angle;
+        }
+
+        function getHipAngle(hip, knee, ankle) {
+            return calcAngle(
+                { x: hip.x, y: hip.y },
+                { x: knee.x, y: knee.y },
+                { x: ankle.x, y: ankle.y }
+            );
+        }
+
+        function getKneeAngle(hip, knee, ankle) {
+            return calcAngle(
+                { x: hip.x, y: hip.y },
+                { x: knee.x, y: knee.y },
+                { x: ankle.x, y: ankle.y }
+            );
+        }
+
+        // 髋屈曲角度：躯干与大腿的夹角
+        function getHipFlexionAngle(shoulder, hip, knee) {
+            return calcAngle(
+                { x: shoulder.x, y: shoulder.y },
+                { x: hip.x, y: hip.y },
+                { x: knee.x, y: knee.y }
+            );
+        }
+
+        // ========== 绘制骨骼 ==========
+        function drawPose(landmarks) {
+            if (!canvasCtx || !canvasElement) return;
+            canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+            
+            const w = canvasElement.width;
+            const h = canvasElement.height;
+            const drawingUtils = new DrawingUtils(canvasCtx);
+            
+            // 绘制骨骼连接
+            const connections = [
+                [11, 12], [11, 13], [13, 15], [12, 14], [14, 16],
+                [11, 23], [12, 24], [23, 24], [23, 25], [25, 27],
+                [24, 26], [26, 28], [27, 29], [28, 30]
+            ];
+            
+            canvasCtx.strokeStyle = '#4ecdc4';
+            canvasCtx.lineWidth = 3;
+            for (const [start, end] of connections) {
+                if (landmarks[start] && landmarks[end]) {
+                    canvasCtx.beginPath();
+                    canvasCtx.moveTo(landmarks[start].x * w, landmarks[start].y * h);
+                    canvasCtx.lineTo(landmarks[end].x * w, landmarks[end].y * h);
+                    canvasCtx.stroke();
+                }
+            }
+            
+            // 绘制关键点
+            for (const lm of landmarks) {
+                canvasCtx.beginPath();
+                canvasCtx.arc(lm.x * w, lm.y * h, 5, 0, 2 * Math.PI);
+                canvasCtx.fillStyle = '#4ecdc4';
+                canvasCtx.fill();
+                canvasCtx.strokeStyle = '#fff';
+                canvasCtx.lineWidth = 1.5;
+                canvasCtx.stroke();
+            }
+        }
+
+        // ========== 姿态检测循环 ==========
+        function detectPose() {
+            if (!isRunning || !poseLandmarker || !videoElement) return;
+
+            if (videoElement.readyState >= 2) {
+                const startTime = performance.now();
+                const results = poseLandmarker.detectForVideo(videoElement, startTime);
+
+                if (results.landmarks && results.landmarks.length > 0) {
+                    const lm = results.landmarks[0];
+                    drawPose(lm);
+                    updateAngles(lm);
+                    frameCount++;
+                } else {
+                    canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+                }
+            }
+
+            animationFrameId = requestAnimationFrame(detectPose);
+        }
+
+        // ========== 角度更新 ==========
+        function updateAngles(landmarks) {
+            // 左腿: hip=23, knee=25, ankle=27
+            // 右腿: hip=24, knee=26, ankle=28
+            // 肩膀: shoulder=11(左), 12(右)
+
+            const leftHipFlexion = getHipFlexionAngle(landmarks[11], landmarks[23], landmarks[25]);
+            const rightHipFlexion = getHipFlexionAngle(landmarks[12], landmarks[24], landmarks[26]);
+            const leftKnee = getKneeAngle(landmarks[23], landmarks[25], landmarks[27]);
+            const rightKnee = getKneeAngle(landmarks[24], landmarks[26], landmarks[28]);
+
+            // 更新UI
+            updateAngleDisplay('leftHipAngle', leftHipFlexion);
+            updateAngleDisplay('rightHipAngle', rightHipFlexion);
+            updateAngleDisplay('leftKneeAngle', leftKnee);
+            updateAngleDisplay('rightKneeAngle', rightKnee);
+
+            // 危险检测
+            checkDanger(leftHipFlexion, rightHipFlexion, landmarks);
+
+            // 收集分析数据（每10帧采样一次）
+            if (frameCount % 10 === 0) {
+                analysisData.frames.push({
+                    frame: frameCount,
+                    timestamp: videoElement.currentTime,
+                    left_hip_angle: Math.round(leftHipFlexion * 10) / 10,
+                    right_hip_angle: Math.round(rightHipFlexion * 10) / 10,
+                    left_knee_angle: Math.round(leftKnee * 10) / 10,
+                    right_knee_angle: Math.round(rightKnee * 10) / 10
+                });
+            }
+
+            // 更新摘要
+            updateAnalysisSummary(leftHipFlexion, rightHipFlexion, leftKnee, rightKnee);
+        }
+
+        function updateAngleDisplay(id, angle) {
+            const el = document.getElementById(id);
+            const rounded = Math.round(angle);
+            el.textContent = rounded + '°';
+            
+            el.className = 'angle-value';
+            if (id.includes('Hip')) {
+                if (angle < 60) {
+                    el.classList.add('angle-danger'); // 过度屈髋
+                } else if (angle < 90) {
+                    el.classList.add('angle-warn'); // 接近危险
+                } else {
+                    el.classList.add('angle-safe');
+                }
+            } else {
+                if (angle > 30 && angle < 160) {
+                    el.classList.add('angle-safe');
+                } else {
+                    el.classList.add('angle-warn');
+                }
+            }
+        }
+
+        function checkDanger(leftHip, rightHip, landmarks) {
+            const dangerCard = document.getElementById('dangerCard');
+            const dangerContent = document.getElementById('dangerContent');
+            let dangers = [];
+
+            // 髋屈曲 > 90° 检查（注意：这里角度越小越弯曲）
+            if (leftHip < 60 || rightHip < 60) {
+                dangers.push('⚠️ 髋屈曲角度过大，请注意不要超过90°！');
+            }
+
+            // 双腿交叉检查
+            const leftHipX = landmarks[23].x;
+            const rightHipX = landmarks[24].x;
+            const leftKneeX = landmarks[25].x;
+            const rightKneeX = landmarks[26].x;
+            
+            // 检测交叉：左膝越过中线到右侧
+            const midX = (leftHipX + rightHipX) / 2;
+            if ((leftKneeX > midX && leftHipX < midX) || (rightKneeX < midX && rightHipX > midX)) {
+                dangers.push('⚠️ 检测到双腿交叉内收，请保持双腿分开！');
+            }
+
+            if (dangers.length > 0) {
+                dangerCard.style.display = 'block';
+                dangerContent.innerHTML = dangers.join('<br>');
+            } else {
+                dangerCard.style.display = 'none';
+            }
+        }
+
+        function updateAnalysisSummary(lh, rh, lk, rk) {
+            analysisData.summary = {
+                max_left_hip: Math.min(analysisData.summary.max_left_hip || 180, lh),
+                max_right_hip: Math.min(analysisData.summary.max_right_hip || 180, rh),
+                avg_left_knee: lk,
+                avg_right_knee: rk,
+                total_frames: frameCount,
+                duration: videoElement ? videoElement.currentTime : 0
+            };
+            
+            lastAnalysisData = {
+                ...analysisData.summary,
+                frame_samples: analysisData.frames.length,
+                samples: analysisData.frames.slice(-20) // 最近20个采样点
+            };
+        }
+
+        // ========== 视频处理 ==========
+        // 通用文件选择触发（兼容手机端浏览器）
+        window.triggerFileInput = function() {
+            const input = document.getElementById('fileInput');
+            if (input) input.click();
+        };
+
+        window.handleFileUpload = function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const url = URL.createObjectURL(file);
+            setupVideo(url);
+            
+            document.getElementById('uploadArea').style.display = 'none';
+            document.getElementById('videoSourceBtns').style.display = 'block';
+            document.getElementById('cameraBtn').style.display = 'none';
+            
+            // 更新视频容器中的上传区域
+            const vc = document.getElementById('videoContainer');
+            vc.innerHTML = `
+                <div class="video-wrapper">
+                    <video id="videoElement" playsinline></video>
+                    <canvas id="poseCanvas"></canvas>
+                </div>
+            `;
+            setupVideo(url);
+        };
+
+        window.startCamera = async function() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { width: 640, height: 480, facingMode: 'user' } 
+                });
+                
+                document.getElementById('uploadArea').style.display = 'none';
+                document.getElementById('videoSourceBtns').style.display = 'block';
+                document.getElementById('cameraBtn').style.display = 'none';
+                
+                const vc = document.getElementById('videoContainer');
+                vc.innerHTML = `
+                    <div class="video-wrapper">
+                        <video id="videoElement" playsinline></video>
+                        <canvas id="poseCanvas"></canvas>
+                    </div>
+                `;
+                
+                videoElement = document.getElementById('videoElement');
+                videoElement.srcObject = stream;
+                await videoElement.play();
+                setupCanvas();
+                startDetection();
+                
+                document.getElementById('videoControls').style.display = 'flex';
+                document.getElementById('analyzeBtn').disabled = false;
+            } catch (err) {
+                alert('无法访问摄像头: ' + err.message);
+            }
+        };
+
+        window.switchToCamera = function() {
+            resetVideo();
+            startCamera();
+        };
+
+        window.resetVideo = function() {
+            stopDetection();
+            const vc = document.getElementById('videoContainer');
+            vc.innerHTML = `
+                <div class="upload-area" onclick="triggerFileInput()">
+                    <div class="icon">🎬</div>
+                    <p>上传视频或开启摄像头开始检测</p>
+                </div>
+            `;
+            document.getElementById('uploadArea').style.display = 'none';
+            document.getElementById('videoSourceBtns').style.display = 'none';
+            document.getElementById('cameraBtn').style.display = 'block';
+            document.getElementById('videoControls').style.display = 'none';
+            document.getElementById('analyzeBtn').disabled = true;
+            frameCount = 0;
+            analysisData = { frames: [], summary: {} };
+        };
+
+        function setupVideo(url) {
+            videoElement = document.getElementById('videoElement');
+            videoElement.src = url;
+            videoElement.playsInline = true;
+            videoElement.play();
+            setupCanvas();
+            startDetection();
+            
+            document.getElementById('videoControls').style.display = 'flex';
+            document.getElementById('analyzeBtn').disabled = false;
+            
+            videoElement.addEventListener('ended', () => {
+                stopDetection();
+                document.getElementById('playBtn').textContent = '▶️ 播放';
+            });
+        }
+
+        function setupCanvas() {
+            canvasElement = document.getElementById('poseCanvas');
+            canvasCtx = canvasElement.getContext('2d');
+            
+            videoElement.addEventListener('loadedmetadata', () => {
+                canvasElement.width = videoElement.videoWidth;
+                canvasElement.height = videoElement.videoHeight;
+            });
+            
+            // 如果已经是摄像头模式
+            if (videoElement.videoWidth) {
+                canvasElement.width = videoElement.videoWidth;
+                canvasElement.height = videoElement.videoHeight;
+            }
+        }
+
+        function startDetection() {
+            isRunning = true;
+            frameCount = 0;
+            analysisData = { frames: [], summary: {} };
+            document.getElementById('statusDot').classList.add('active');
+            document.getElementById('statusText').textContent = '检测中';
+            detectPose();
+        }
+
+        function stopDetection() {
+            isRunning = false;
+            if (animationFrameId) {
+                cancelAnimationFrame(animationFrameId);
+                animationFrameId = null;
+            }
+            document.getElementById('statusDot').classList.remove('active');
+            document.getElementById('statusText').textContent = '已停止';
+        }
+
+        window.togglePlayback = function() {
+            if (!videoElement) return;
+            if (videoElement.paused) {
+                videoElement.play();
+                document.getElementById('playBtn').textContent = '⏸️ 暂停';
+                if (isRunning) detectPose();
+            } else {
+                videoElement.pause();
+                document.getElementById('playBtn').textContent = '▶️ 播放';
+                stopDetection();
+            }
+        };
+
+        // ========== AI 工作流调用（已修复 SSE 流式响应解析）==========
+        window.analyzeWithAI = async function() {
+            const resultDiv = document.getElementById('aiResult');
+            
+            if (!lastAnalysisData || lastAnalysisData.total_frames === 0) {
+                resultDiv.innerHTML = '<p class="error">请先让视频运行一段时间，采集足够数据后再分析</p>';
+                return;
+            }
+
+            const workflowId = document.getElementById('workflowId').value.trim();
+            const token = document.getElementById('apiToken').value.trim();
+            const apiUrl = document.getElementById('apiUrl').value.trim();
+
+            if (!workflowId || !token) {
+                resultDiv.innerHTML = '<p class="error">请先在左侧配置 API Token 和工作流 ID</p>';
+                return;
+            }
+
+            resultDiv.innerHTML = '<div class="loading"><div class="spinner"></div> AI 正在分析动作数据...</div>';
+            document.getElementById('analyzeBtn').disabled = true;
+
+            try {
+                const payload = {
+                    workflow_id: workflowId,
+                    parameters: {
+                        user_input: JSON.stringify(lastAnalysisData)
+                    }
+                };
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    const errText = await response.text().catch(() => '');
+                    throw new Error(`API请求失败 (${response.status})${errText ? ': ' + errText.substring(0, 200) : ''}`);
+                }
+
+                // ✅ 修复：正确处理 SSE 流式响应（含调试模式）
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let fullContent = '';
+                let buffer = '';
+                let rawLines = []; // 收集所有原始SSE行用于调试
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop();
+                    
+                    for (const line of lines) {
+                        const trimmed = line.trim();
+                        if (!trimmed || trimmed === '' || trimmed.startsWith('event:')) continue;
+                        
+                        // 收集所有原始数据用于调试
+                        rawLines.push(trimmed);
+                        
+                        if (trimmed.startsWith('data:')) {
+                            const dataStr = trimmed.slice(5).trim();
+                            if (dataStr === '[DONE]') continue;
+                            try {
+                                const data = JSON.parse(dataStr);
+                                console.log('[SSE] 收到数据:', JSON.stringify(data, null, 2));
+                                
+                                // 尝试多种可能的字段名
+                                // 扣子工作流常见返回格式:
+                                // {msg: "xxx"} 
+                                // {content: "xxx"}
+                                // {output: "xxx"}
+                                // {data: "xxx"}
+                                // {event: "xxx", data: {output: "xxx"}}
+                                // {id: "xxx", content: "xxx", event_type: "xxx"}
+                                
+                                const possibleFields = ['msg', 'content', 'output', 'text', 'message', 'result', 'answer'];
+                                
+                                for (const field of possibleFields) {
+                                    if (data[field] && typeof data[field] === 'string') {
+                                        fullContent = data[field];
+                                    }
+                                }
+                                
+                                // 嵌套结构: data.output / data.data / data.result
+                                if (data.data && typeof data.data === 'object') {
+                                    for (const field of possibleFields) {
+                                        if (data.data[field]) {
+                                            fullContent = typeof data.data[field] === 'string' ? data.data[field] : JSON.stringify(data.data[field], null, 2);
+                                        }
+                                    }
+                                }
+                                
+                                // WorkflowFinished 事件
+                                if (data.event === 'WorkflowFinished' || data.event_type === 'WorkflowFinished') {
+                                    if (data.data) {
+                                        try {
+                                            const output = typeof data.data === 'string' ? JSON.parse(data.data) : data.data;
+                                            fullContent = typeof output === 'string' ? output : JSON.stringify(output, null, 2);
+                                        } catch (e) {
+                                            fullContent = typeof data.data === 'string' ? data.data : JSON.stringify(data.data);
+                                        }
+                                    }
+                                }
+                                
+                                // 如果还没匹配到，保存整个JSON作为备选
+                                if (!fullContent) {
+                                    fullContent = JSON.stringify(data, null, 2);
+                                }
+                                
+                            } catch (e) {
+                                // 非JSON，保留原始文本
+                                if (dataStr && dataStr !== '[DONE]') {
+                                    fullContent = dataStr;
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // 处理buffer中剩余数据
+                if (buffer.trim()) {
+                    rawLines.push(buffer.trim());
+                    console.log('[SSE] 缓冲剩余:', buffer.trim());
+                }
+
+                console.log('[SSE] 所有原始行:', rawLines);
+
+                if (fullContent) {
+                    // 尝试美化显示
+                    try {
+                        const parsed = JSON.parse(fullContent);
+                        resultDiv.innerHTML = `<div class="result-content">${formatResult(parsed)}</div>`;
+                    } catch {
+                        resultDiv.innerHTML = `<div class="result-content">${escapeHtml(fullContent)}</div>`;
+                    }
+                } else if (rawLines.length > 0) {
+                    // 有原始数据但没解析出内容，显示原始数据用于调试
+                    resultDiv.innerHTML = `<div class="result-content" style="color:#f39c12;">
+                        <p>⚠️ 收到数据但未能识别内容，以下是原始返回（请截图发给我分析）：</p>
+                        <pre style="background:#1a1a2e; padding:10px; border-radius:6px; margin-top:8px; font-size:0.8em; white-space:pre-wrap; word-break:break-all; color:#aaa; max-height:200px; overflow-y:auto;">${escapeHtml(rawLines.join('\n'))}</pre>
+                    </div>`;
+                } else {
+                    resultDiv.innerHTML = '<p style="color:#f39c12;">⚠️ 工作流已执行，但未返回任何数据。</p>';
+                }
+
+                // 显示语音播报按钮
+                showSpeakButton();
+
+            } catch (error) {
+                console.error('工作流调用错误:', error);
+                resultDiv.innerHTML = `<p class="error">❌ 工作流调用失败: ${escapeHtml(error.message)}</p>`;
+            }
+
+            document.getElementById('analyzeBtn').disabled = false;
+        };
+
+        function formatResult(data) {
+            if (typeof data === 'string') return escapeHtml(data);
+            if (typeof data !== 'object') return escapeHtml(String(data));
+            
+            let html = '';
+            for (const [key, value] of Object.entries(data)) {
+                if (typeof value === 'object' && value !== null) {
+                    html += `<p><strong>${escapeHtml(key)}:</strong></p><div style="margin-left:15px; margin-bottom:10px;">${formatResult(value)}</div>`;
+                } else {
+                    html += `<p><strong>${escapeHtml(key)}:</strong> ${escapeHtml(String(value))}</p>`;
+                }
+            }
+            return html;
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // ========== 语音播报 ==========
+        window.speakResult = function() {
+            const resultDiv = document.getElementById('aiResult');
+            if (!resultDiv) return;
+            
+            // 提取纯文本内容
+            const text = resultDiv.innerText || resultDiv.textContent;
+            if (!text || text.includes('上传视频后点击')) return;
+            
+            // 停止之前的播报
+            window.speechSynthesis.cancel();
+            
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'zh-CN';
+            utterance.rate = 0.9;
+            utterance.pitch = 1;
+            utterance.volume = 1;
+            
+            const btn = document.getElementById('speakBtn');
+            if (btn) btn.textContent = '🔊 播报中...';
+            
+            utterance.onend = () => {
+                if (btn) btn.textContent = '🔊 语音播报';
+            };
+            utterance.onerror = () => {
+                if (btn) btn.textContent = '🔊 语音播报';
+            };
+            
+            window.speechSynthesis.speak(utterance);
+        };
+
+        // 显示语音播报按钮（在分析结果后调用）
+        function showSpeakButton() {
+            const btn = document.getElementById('speakBtn');
+            if (btn) btn.style.display = 'block';
+        }
+
+        // ========== 配置保存 ==========
+        window.saveConfig = function() {
+            const config = {
+                apiUrl: document.getElementById('apiUrl').value,
+                apiToken: document.getElementById('apiToken').value,
+                workflowId: document.getElementById('workflowId').value
+            };
+            localStorage.setItem('rehab_demo_config', JSON.stringify(config));
+            
+            const btn = document.querySelector('.btn-save');
+            btn.textContent = '✅ 已保存';
+            setTimeout(() => { btn.textContent = '💾 保存配置'; }, 2000);
+        };
+
+        // 加载已保存的配置
+        function loadConfig() {
+            try {
+                const saved = localStorage.getItem('rehab_demo_config');
+                if (saved) {
+                    const config = JSON.parse(saved);
+                    if (config.apiUrl) document.getElementById('apiUrl').value = config.apiUrl;
+                    if (config.apiToken) document.getElementById('apiToken').value = config.apiToken;
+                    if (config.workflowId) document.getElementById('workflowId').value = config.workflowId;
+                }
+            } catch (e) {
+                console.error('加载配置失败:', e);
+            }
+        }
+        loadConfig();
+
+        // ========== 移动端配置面板 ==========
+        window.toggleConfig = function() {
+            document.getElementById('configPanel').classList.toggle('show');
+        };
+    </script>
+</body>
+</html>
