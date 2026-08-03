@@ -98,25 +98,28 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.4.4/build/qrcode.min.js"></script>
     <script>
-        // 生成主程序二维码
-        QRCode.toCanvas(document.getElementById('mainQR'), 
-            'https://chenmiao-coder.github.io/huhuxiaoyu/index.html',
-            { width: 180, margin: 2 },
-            function(error) {
-                if (error) console.error(error);
-            }
-        );
+        // 等待 DOM 完全加载后再生成二维码
+        document.addEventListener('DOMContentLoaded', function() {
+            // 生成主程序二维码
+            QRCode.toCanvas(document.getElementById('mainQR'), 
+                'https://chenmiao-coder.github.io/huhuxiaoyu/index.html',
+                { width: 180, margin: 2 },
+                function(error) {
+                    if (error) console.error('主程序二维码生成失败:', error);
+                }
+            );
 
-        // 生成反馈表单二维码
-        QRCode.toCanvas(document.getElementById('feedbackQR'),
-            'https://nsvojjgk.jsjform.com/f/mM0zGw',
-            { width: 180, margin: 2 },
-            function(error) {
-                if (error) console.error(error);
-            }
-        );
+            // 生成反馈表单二维码
+            QRCode.toCanvas(document.getElementById('feedbackQR'),
+                'https://nsvojjgk.jsjform.com/f/mM0zGw',
+                { width: 180, margin: 2 },
+                function(error) {
+                    if (error) console.error('反馈表单二维码生成失败:', error);
+                }
+            );
+        });
     </script>
 </body>
 </html>
