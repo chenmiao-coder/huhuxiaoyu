@@ -26,7 +26,7 @@
         .qr-section h3 { font-size: 20px; color: #333; margin-bottom: 20px; }
         .qr-container { display: flex; justify-content: space-around; gap: 20px; flex-wrap: wrap; }
         .qr-item { text-align: center; }
-        .qr-item img { width: 180px; height: 180px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .qr-item canvas { width: 180px; height: 180px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
         .qr-label { margin-top: 12px; font-size: 14px; font-weight: 600; padding: 6px 16px; border-radius: 20px; display: inline-block; }
         .qr-label.main { background: #2196F3; color: white; }
         .qr-label.feedback { background: #FF9800; color: white; }
@@ -38,7 +38,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1> 护髋小愈</h1>
+            <h1>🏥 护髋小愈</h1>
             <p>智能分析 · 实时纠正 · 科学康复</p>
         </div>
         
@@ -61,30 +61,30 @@
                     <div class="feature-desc">自动播报纠正建议<br>中文语音清晰自然</div>
                 </div>
                 <div class="feature-card">
-                    <div class="feature-icon"></div>
+                    <div class="feature-icon">📊</div>
                     <div class="feature-title">进度追踪</div>
                     <div class="feature-desc">可视化训练数据<br>康复里程碑打卡</div>
                 </div>
             </div>
             
             <div class="highlights">
-                <h3>特色功能</h3>
+                <h3>✨ 特色功能</h3>
                 <div class="highlight-item">视频/图片多模态动作分析</div>
                 <div class="highlight-item">分阶段训练计划（术后 1-2 周/3-6 周/6-12 周/3 个月+）</div>
-                <div class="highlight-item">训练记录本地保存，随时查看</div>
+                <div class="highlight-item">训练记录自动保存，随时查看</div>
                 <div class="highlight-item">每日训练提醒，养成康复习惯</div>
                 <div class="highlight-item">7 个康复里程碑成就系统</div>
             </div>
             
             <div class="qr-section">
-                <h3>扫码立即体验</h3>
+                <h3>📱 扫码立即体验</h3>
                 <div class="qr-container">
                     <div class="qr-item">
-                        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAASwAAAEsAQMAAABDsxw2AAAABlBMVEX///8AAABVwtN+AAAACXBIWXMAAA7EAAAOxAGVKw4bAAAB3klEQVRoge2aO7LCMAxF9YaCMkvIUrI0s7QsJUtImYKJnvWzw6egEaS4qoR9qO5I1kUQfRaFPWr+x/NwJ16u8vlONMbdAiwZW1SMC9O4VaymzDW5yeG4mVLA8jGRZr2wnYhYvEmJiFiVF9WAfQ+TApkHLRARy+UDdkqMrruWWO1vu7Y9YF/EWn/jnaZ4XFysd20QWALGHvbK2FtfxYoi0gCWjB1Ca4dIVVP53gewn2GmaVWwRq0sS1gHsy4usGxMcp3HFjUp4lau3MN4YMmY5HobJkUfl7JSNymhKbAfYyR23ly8HIaXsf7WKwtYKnYQix9MShPzTsDysSqNTMWukYR2vOf+BiwRM42iQNykuGe0ULGAnQErkpmFqZ+mNeYx9tngRsf+BiwHI/J5jNt4rP1tMCmjvwFLxQprgRC5r/ddSYub6QgsF1sEiduZ3DOWJ9WAnQazkYDDWmp/i7rzNggsGbM66vNYrEi8svQEWCrWY2QbvVQs18gbHbBzYIU92vbKxuPheELAkjHTy2dgHY/VWsa7E1M0sFwsdru2VeSX/vayiAeWioVnPL71xb4I7GTYZhf6P66HeKwsYBlY9LdRTtqvK1FrbasILBNriohYE4evt0VVt4rAToB9Fv9RoyWTuTbvnAAAAABJRU5ErkJggg==" alt="主程序二维码">
+                        <canvas id="mainQR"></canvas>
                         <div class="qr-label main">主程序</div>
                     </div>
                     <div class="qr-item">
-                        <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAcIAAAHCAQAAAABUY/ToAAADkElEQVR4nO2cW4rjMBBFT40N+ZRhFtBLUXYwS2pmSbMDeylZQIP9GZC58yHJj06GgaZDHlR9hNjSwTZcSqqHbeJrNvz4IghOOumkk0466aSTj0dasbb8O05mZt1sZh0Acz1nZna88906+ZBklCSNoB7Q7w6kU4s0zmZHGgGNJEl78h536+RDktPiX4Jk70qYvUkMXSOYzAAws/b7runka5Dtp2MjzC1MHWJqE3EEDW/p87xne04nb0deaCP+OQhIrRESi5q+85pOvhZZxREETADhbBA+AOZWeSCMGMA2Iflcz+nkzcnBrMZg00HEU/mx49Ri76cWYM5h2f3v1smHIrMf2vqXkKjO6GwMb+vhvizyXM/p5O1IcrgeJRFHgCARx6aey0F/I/Uso5LUP9dzOnk7MmtoNQgJ9TQlXaSxKeKKy6hcQ05urShizSKOICmVbGMfEtVBJSBUsbmGnKxWFJEFksjLWNbLOmUkD1SFuYac3FjVUKlhqK+eJu99oBFxcUtZTa4hJ7e28UNRqZ4b2XikVTm+ljl5xWpclrZLVh9S9kgbF9Tn+Y1ryMm97YoYIbUQEhZPB8FkwPRTFjW3FscO4p+fWOzvdbdOPiLJbu9DjsHWsL4uY1tn5H7Iyb1t99Sh/KuHNZjv89TG80NOXrG8llkcQUyWqx6WE0I0MqY2QfhoNRxnE9PBe9CcvEaqB+y4LGjLuTzwfjqojs5ec3XyKjmYmfpNm9Bs5C5qZiv1j9zM2LgfcnJvZS0jjFjsz5a7F5k6jNAIpo78k4OzfklgP9dzOnk7suaHxhqI5Tx1PaxTavZoIXxP7eRiu3pZ6fNYC/W19LHLQLqGnNxZ9UNNrY2NsLYO1Z9dstrrZU7ubJNjjEpLeX7fP6Tipbxe5uQVq5pIXLQOUfqH1uy0r2VOXrEiictKa7Hag1bn+Z7ayc9W1jLWyvxlT9EyZW20dg05uZj2Vs7mdiJV30Sz3V27H3JyZ1vlrHHZuHY01v7Y1QW5hpzcWdkrL5uiLJBl+FOo7z1oTv6TrN/9MOtKVbW+VVYLZMP6ius3XdPJ1ySl0yH7HLO3s9kxnE2/6xdj1IeEHb/5mk6+GDl09SfX6KcWex8pG2umtsZvD3G3Tj4AefndD8AIoOEXKKspnE1RYHHsTPe7WycfkbyIy4AlLlveW1QqGWt/v8zJCzP9f85V82+cO+mkk0466aSTL0L+BWESVJ/LWEEhAAAAAElFTkSuQmCC" alt="反馈表单二维码">
+                        <canvas id="feedbackQR"></canvas>
                         <div class="qr-label feedback">反馈表单</div>
                     </div>
                 </div>
@@ -97,5 +97,26 @@
             <p>建议在医生/康复师指导下使用</p>
         </div>
     </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script>
+        // 生成主程序二维码
+        QRCode.toCanvas(document.getElementById('mainQR'), 
+            'https://chenmiao-coder.github.io/huhuxiaoyu/index.html',
+            { width: 180, margin: 2 },
+            function(error) {
+                if (error) console.error(error);
+            }
+        );
+
+        // 生成反馈表单二维码
+        QRCode.toCanvas(document.getElementById('feedbackQR'),
+            'https://nsvojjgk.jsjform.com/f/mM0zGw',
+            { width: 180, margin: 2 },
+            function(error) {
+                if (error) console.error(error);
+            }
+        );
+    </script>
 </body>
 </html>
