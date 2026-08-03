@@ -1459,7 +1459,7 @@ function toggleDebug() {
         }
         
         // 自动提交训练记录到 Supabase
-            
+            window.submitTrainingRecord = async function() {
             if (!TRAINING_RECORD_API_URL || TRAINING_RECORD_API_URL === 'YOUR_API_SERVICE_URL') {
                 console.log('训练记录 API 未配置，跳过自动提交');
                 return;
