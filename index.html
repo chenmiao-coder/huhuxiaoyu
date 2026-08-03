@@ -979,9 +979,9 @@
             }
         }
     </style>
-<button id="debugBtn" onclick="toggleDebug()" style="position:fixed;top:10px;right:10px;z-index:1000;background:#9c27b0;color:white;border:none;padding:8px 15px;border-radius:5px;font-size:14px;cursor:pointer;">调试</button>
+<button id="debugBtn" onclick="toggleDebug()" style="position:fixed;top:10px;right:10px;z-index:999;background:#9c27b0;color:white;border:none;padding:8px 15px;border-radius:5px;font-size:14px;cursor:pointer;">调试</button>
 
-<div id="debugInfo" style="display:none;position:fixed;top:50px;right:10px;z-index:1000;width:400px;max-height:300px;overflow-y:auto;background:#1a1a1a;border:2px solid #9c27b0;border-radius:10px;padding:10px;"></div>
+<div id="debugInfo" style="display:none;position:fixed;top:50px;right:10px;z-index:998;width:350px;max-height:250px;overflow-y:auto;background:rgba(26,26,26,0.95);border:2px solid #9c27b0;border-radius:10px;padding:10px;font-family:monospace;"></div>
 
 <script>
 function toggleDebug() {
@@ -1012,7 +1012,7 @@ function toggleDebug() {
             </div>
             <div class="config-group">
                 <label>工作流 ID</label>
-                <input type="text" id="workflowId" value="7656444733648240694" readonly style="opacity:0.6;cursor:not-allowed;">
+                <input type="text" id="workflowId" value="7669706474775838747" readonly style="opacity:0.6;cursor:not-allowed;">
             </div>
             <button class="btn btn-primary btn-save" onclick="alert('配置已内置，无需修改')" style="opacity:0.5;cursor:not-allowed;">💾 保存配置</button>
             
