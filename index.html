@@ -2163,40 +2163,67 @@ function toggleDebug() {
             token: 'pat_RLzQwUwV4EZfYm3mZiPWw3gFkoCYKYiux8bnKi9UxLxTWormmRTcDANJU1rOMenK'
         };
 
+        // 调试日志函数
+        function logToDebug(message, type = 'info') {
+            const debugDiv = document.getElementById('debugInfo');
+            if (debugDiv) {
+                const time = new Date().toLocaleTimeString();
+                const color = type === 'error' ? '#ff4444' : type === 'success' ? '#44ff44' : '#ffffff';
+                debugDiv.innerHTML += `<div style="color:${color};margin:5px 0;font-size:12px;">[${time}] ${message}</div>`;
+                debugDiv.scrollTop = debugDiv.scrollHeight;
+            }
+            console.log(message);
+        }
+
         // 保存训练记录到扣子平台数据表
         async function saveToCozeDB(record) {
             try {
+                logToDebug('📤 开始保存训练记录到扣子平台...', 'info');
+                logToDebug(`📊 数据：${JSON.stringify(record)}`, 'info');
+                
+                const requestBody = {
+                    workflow_id: COZE_API_CONFIG.workflowId,
+                    parameters: {
+                        user_id: record.userId || 'anonymous_' + Date.now(),
+                        training_content: record.trainingContent || record.actionType || '未记录',
+                        training_duration: String(record.duration || record.frameCount || 0),
+                        agent_reply: record.agentReply || record.analysisContent || '',
+                        device_info: JSON.stringify({
+                            screen: `${window.screen.width}x${window.screen.height}`,
+                            language: navigator.language,
+                            userAgent: navigator.userAgent.substring(0, 100)
+                        })
+                    }
+                };
+                
+                logToDebug(`🔗 API: ${COZE_API_CONFIG.apiUrl}`, 'info');
+                logToDebug(`🆔 工作流 ID: ${COZE_API_CONFIG.workflowId}`, 'info');
+                
                 const response = await fetch(COZE_API_CONFIG.apiUrl, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${COZE_API_CONFIG.token}`,
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        workflow_id: COZE_API_CONFIG.workflowId,
-                        parameters: {
-                            user_id: record.userId || 'anonymous_' + Date.now(),
-                            training_content: record.trainingContent || record.actionType || '未记录',
-                            training_duration: String(record.duration || record.frameCount || 0),
-                            agent_reply: record.agentReply || record.analysisContent || '',
-                            device_info: JSON.stringify({
-                                screen: `${window.screen.width}x${window.screen.height}`,
-                                language: navigator.language,
-                                userAgent: navigator.userAgent.substring(0, 100)
-                            })
-                        }
-                    })
+                    body: JSON.stringify(requestBody)
                 });
 
+                logToDebug(`📥 响应状态：${response.status}`, response.ok ? 'success' : 'error');
+                
                 if (response.ok) {
-                    console.log('✅ 训练记录已保存到扣子平台');
+                    const result = await response.text();
+                    logToDebug(`✅ 训练记录已保存到扣子平台`, 'success');
+                    logToDebug(`📄 响应：${result.substring(0, 200)}`, 'info');
                     return true;
                 } else {
-                    console.error('❌ 保存到扣子平台失败:', response.status);
+                    const errorText = await response.text();
+                    logToDebug(`❌ 保存到扣子平台失败：${response.status}`, 'error');
+                    logToDebug(`📄 错误：${errorText}`, 'error');
                     return false;
                 }
             } catch (error) {
-                console.error('❌ 调用扣子 API 错误:', error);
+                logToDebug(`❌ 调用扣子 API 错误：${error.message}`, 'error');
+                logToDebug(`📄 堆栈：${error.stack}`, 'error');
                 return false;
             }
         }
