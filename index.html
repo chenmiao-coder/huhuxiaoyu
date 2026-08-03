@@ -1017,7 +1017,7 @@ function toggleDebug() {
             <button class="btn btn-primary btn-save" onclick="alert('配置已内置，无需修改')" style="opacity:0.5;cursor:not-allowed;">💾 保存配置</button>
             
             <h3 style="margin-top:20px;">📹 视频源</h3>
-            <input type="file" id="videoInput" accept="video/*" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none;" onchange="handleFileUpload(event)" tabindex="-1">
+            <input type="file" id="videoInput" accept="video/*" style="position:absolute;opacity:0;width:1px;height:1px;pointer-events:none;" onchange="handleFileUpload(event)" tabindex="-1">
             <button class="btn btn-secondary" onclick="triggerVideoUpload()">📁 上传视频</button>
             <button class="btn btn-secondary" onclick="startCamera()">📷 使用摄像头</button>
             
