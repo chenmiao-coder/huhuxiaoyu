@@ -1486,16 +1486,7 @@ function toggleDebug() {
         };
 
         
-        // 自动生成用户 ID
-        function getUserId() {
-            let userId = localStorage.getItem('userId');
-            if (!userId) {
-                userId = 'user_' + Math.random().toString(36).substr(2, 9);
-                localStorage.setItem('userId', userId);
-            }
-            return userId;
-        }
-        
+       
         // 自动提交训练记录到扣子工作流 API
         window.autoSubmitTrainingRecord = async function(trainingContent, trainingDuration, agentReply) {
             const WORKFLOW_API_URL = 'https://r5bjfygc7b.coze.site/api/save-record'; // 工作流 API 地址
