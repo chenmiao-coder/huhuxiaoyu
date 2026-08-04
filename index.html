@@ -1640,6 +1640,7 @@ function toggleDebug() {
                     body: JSON.stringify({
                         workflow_id: workflowId,
                         parameters: {
+                            training_content: JSON.stringify(videoAnalysis),
                             user_input: '请分析我的康复动作',
                             video_analysis: JSON.stringify(videoAnalysis),
                             user_stage: '术后3个月'
