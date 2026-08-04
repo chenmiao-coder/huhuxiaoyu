@@ -1,4 +1,8 @@
-<!DOCTYPE html>
+网页标题：
+
+网页链接：https://raw.githubusercontent.com/chenmiao-coder/huhuxiaoyu/main/index.html
+
+网页内容：<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
@@ -39,14 +43,12 @@
             0%, 100% { opacity: 1; }
             50% { opacity: 0.4; }
         }
-
         .main-container {
             display: grid;
             grid-template-columns: 280px 1fr 320px;
             gap: 0;
             height: calc(100vh - 60px);
         }
-
         /* 左侧配置面板 */
         .config-panel {
             background: #1a1a2e;
@@ -107,7 +109,6 @@
             opacity: 0.5;
             cursor: not-allowed;
         }
-
         /* 中间视频区域 */
         .video-area {
             position: relative;
@@ -173,7 +174,6 @@
             transform: scale(1.05);
             box-shadow: 0 5px 20px rgba(231,76,60,0.4);
         }
-
         /* 右侧信息面板 */
         .info-panel {
             background: #1a1a2e;
@@ -217,7 +217,6 @@
         .angle-safe { color: #2ecc71; }
         .angle-warning { color: #f39c12; }
         .angle-danger { color: #e74c3c; }
-
         .result-area {
             min-height: 100px;
             line-height: 1.6;
@@ -554,6 +553,7 @@
             margin-bottom: 3px;
         }
         .stat-card .stat-desc {
+
             color: #888;
             font-size: 0.8em;
         }
@@ -892,7 +892,6 @@
         .reminder-toggle.active::after {
             left: 26px;
         }
-
         /* 配置面板切换按钮 */
         .config-toggle {
             display: none;
@@ -908,7 +907,6 @@
             z-index: 1000;
             font-size: 1.2em;
         }
-
         /* 移动端适配 */
         @media (max-width: 1024px) {
             .main-container {
@@ -980,9 +978,7 @@
         }
     </style>
 <button id="debugBtn" onclick="toggleDebug()" style="position:fixed;top:10px;right:10px;z-index:1000;background:#9c27b0;color:white;border:none;padding:8px 15px;border-radius:5px;font-size:14px;cursor:pointer;">调试</button>
-
 <div id="debugInfo" style="display:none;position:fixed;top:50px;right:10px;z-index:1000;width:400px;max-height:300px;overflow-y:auto;background:#1a1a1a;border:2px solid #9c27b0;border-radius:10px;padding:10px;"></div>
-
 <script>
 function toggleDebug() {
     const debugDiv = document.getElementById('debugInfo');
@@ -997,7 +993,6 @@ function toggleDebug() {
             <span id="statusText">未连接</span>
         </div>
     </div>
-
     <div class="main-container">
         <!-- 左侧配置面板 -->
         <div class="config-panel" id="configPanel">
@@ -1024,7 +1019,6 @@ function toggleDebug() {
             <h3 style="margin-top:20px;">🎯 动作分析</h3>
             <button class="btn btn-primary" id="analyzeBtn" onclick="analyzeMovement()" disabled>🤖 AI康复指导</button>
         </div>
-
         <!-- 中间视频区域 -->
         <div class="video-area">
             <div class="video-container" id="videoContainer">
@@ -1036,7 +1030,6 @@ function toggleDebug() {
                 </div>
             </div>
         </div>
-
         <!-- 右侧信息面板 -->
         <div class="info-panel">
             <h3>📊 实时角度监测</h3>
@@ -1062,6 +1055,7 @@ function toggleDebug() {
                     </div>
                     <div class="angle-item">
                         <div class="angle-value angle-safe" id="rightKneeAngle">--°</div>
+
                         <div class="angle-label">右腿</div>
                     </div>
                 </div>
@@ -1070,7 +1064,6 @@ function toggleDebug() {
                 <h4>⚠️ 危险提示</h4>
                 <div id="dangerContent" style="color: #e74c3c; font-size: 0.85em;"></div>
             </div>
-
             <h3 style="margin-top:20px;">🤖 AI分析结果</h3>
             <div style="margin:10px 0;">
                 <button class="history-btn" onclick="showHistory()"> 历史记录</button>
@@ -1088,12 +1081,9 @@ function toggleDebug() {
             </div>
         </div>
     </div>
-
     <button class="config-toggle" onclick="toggleConfig()">⚙️</button>
-
     <script type="module">
         import { PoseLandmarker, FilesetResolver, DrawingUtils } from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14";
-
         // ========== 全局状态 ==========
         let poseLandmarker = null;
         let videoElement = null;
@@ -1104,7 +1094,6 @@ function toggleDebug() {
         let analysisData = { frames: [], summary: {} };
         let frameCount = 0;
         let lastAnalysisData = null;
-
         // ========== 初始化 MediaPipe ==========
         async function initPoseLandmarker() {
             const statusDot = document.getElementById('statusDot');
@@ -1137,7 +1126,6 @@ function toggleDebug() {
                 statusText.textContent = '模型加载失败';
             }
         }
-
         // ========== 视频处理 ==========
         window.triggerVideoUpload = function() {
             console.log('触发视频上传');
@@ -1150,7 +1138,6 @@ function toggleDebug() {
                 alert('视频上传组件未找到，请刷新页面重试');
             }
         };
-
         window.handleFileUpload = async function(event) {
             console.log('handleFileUpload 被调用');
             console.log('event.target.files:', event.target.files);
@@ -1192,7 +1179,6 @@ function toggleDebug() {
                 alert('视频加载失败：' + error.message);
             }
         };
-
         window.startCamera = async function() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ 
@@ -1206,7 +1192,6 @@ function toggleDebug() {
                 alert('无法访问摄像头: ' + error.message);
             }
         };
-
         async function setupVideo(url, stream = null) {
             const container = document.getElementById('videoContainer');
             const placeholder = document.getElementById('placeholder');
@@ -1257,7 +1242,6 @@ function toggleDebug() {
                 document.getElementById('analyzeBtn').disabled = false;
             });
         }
-
         // ========== 骨骼检测 ==========
         function detectPose() {
             if (!isRunning || !poseLandmarker || !videoElement) return;
@@ -1297,7 +1281,6 @@ function toggleDebug() {
             
             animationFrameId = requestAnimationFrame(detectPose);
         }
-
         // ========== 角度分析 ==========
         function analyzeAngles(landmarks) {
             // 关键点索引
@@ -1357,7 +1340,6 @@ function toggleDebug() {
             // 检查危险动作
             checkDangerousMovement(leftHipAngle, rightHipAngle, leftKneeAngle, rightKneeAngle);
         }
-
         function calculateAngle(p1, p2, p3) {
             const radians = Math.atan2(p3.y - p2.y, p3.x - p2.x) - 
                            Math.atan2(p1.y - p2.y, p1.x - p2.x);
@@ -1365,7 +1347,6 @@ function toggleDebug() {
             if (angle > 180) angle = 360 - angle;
             return Math.round(angle);
         }
-
         function updateAngleDisplay(elementId, angle) {
             const element = document.getElementById(elementId);
             if (!element) return;
@@ -1382,7 +1363,6 @@ function toggleDebug() {
                 element.classList.add('angle-danger');
             }
         }
-
         function checkDangerousMovement(leftHip, rightHip, leftKnee, rightKnee) {
             const dangerCard = document.getElementById('dangerCard');
             const dangerContent = document.getElementById('dangerContent');
@@ -1406,7 +1386,6 @@ function toggleDebug() {
                 dangerCard.style.display = 'none';
             }
         }
-
         // ========== AI 分析 ==========
         
         // 自动打开问卷链接（半自动方案）
@@ -1443,7 +1422,6 @@ function toggleDebug() {
                 window.submitTrainingRecord();
             }, 3000);
         };
-
         
         // 训练记录 API 服务地址
         const TRAINING_RECORD_API_URL = 'YOUR_API_SERVICE_URL'; // 替换为部署后的 API 服务地址，例如：https://your-api.coze.cn
@@ -1459,7 +1437,15 @@ function toggleDebug() {
         }
         
         // 自动提交训练记录到 Supabase
-            
+
+        window.submitTrainingRecordToSupabase = async function() {
+            const record = {
+                user_id: getUserId(),
+                training_content: '',
+                training_duration: 0,
+                agent_reply: ''
+            };
+
             if (!TRAINING_RECORD_API_URL || TRAINING_RECORD_API_URL === 'YOUR_API_SERVICE_URL') {
                 console.log('训练记录 API 未配置，跳过自动提交');
                 return;
@@ -1471,6 +1457,7 @@ function toggleDebug() {
                     headers: {
                         'Content-Type': 'application/json'
                     },
+
                     body: JSON.stringify(record)
                 });
                 
@@ -1484,7 +1471,6 @@ function toggleDebug() {
                 console.error('保存错误:', error);
             }
         };
-
         
        
         // 自动提交训练记录到扣子工作流 API
@@ -1528,7 +1514,6 @@ function toggleDebug() {
                 console.error('保存错误:', error);
             }
         };
-
         
         // 保存训练记录到数据库（调用工作流）
         window.saveTrainingRecordToDB = async function(aiReply) {
@@ -1566,7 +1551,6 @@ function toggleDebug() {
         
         // 分析开始时间
         let analysisStartTime = null;
-
         window.analyzeMovement = async function() {
             analysisStartTime = Date.now(); // 记录分析开始时间
             const debugDiv = document.getElementById('debugInfo');
@@ -1802,15 +1786,14 @@ function toggleDebug() {
             }
             
             btn.disabled = false;
+
             btn.textContent = '🤖 AI康复指导';
         };
-
         function calculateAverage(key) {
             if (analysisData.frames.length === 0) return 0;
             const sum = analysisData.frames.reduce((acc, frame) => acc + frame[key], 0);
             return Math.round(sum / analysisData.frames.length);
         }
-
         function formatResult(data) {
             if (typeof data === 'string') return escapeHtml(data);
             if (typeof data !== 'object') return escapeHtml(String(data));
@@ -1965,13 +1948,11 @@ function toggleDebug() {
             
             return `<div class="analysis-card"><div class="content">${html}</div></div>`;
         }
-
         function escapeHtml(text) {
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
         }
-
         // ========== 配置保存 ==========
         window.saveConfig = function() {
             const config = {
@@ -1985,7 +1966,6 @@ function toggleDebug() {
             btn.textContent = '✅ 已保存';
             setTimeout(() => { btn.textContent = '💾 保存配置'; }, 2000);
         };
-
         // 加载已保存的配置
         function loadConfig() {
             try {
@@ -2001,12 +1981,10 @@ function toggleDebug() {
             }
         }
         loadConfig();
-
         // ========== 移动端配置面板 ==========
         window.toggleConfig = function() {
             document.getElementById('configPanel').classList.toggle('show');
         };
-
         // ========== 语音播报功能 ==========
         let currentResultText = '';
         
@@ -2067,7 +2045,6 @@ function toggleDebug() {
         if (window.speechSynthesis) {
             window.speechSynthesis.getVoices();
         }
-
         // ========== IndexedDB 训练记录管理 ==========
         const DB_NAME = 'RehabTrainingDB';
         const DB_VERSION = 1;
@@ -2103,7 +2080,6 @@ function toggleDebug() {
             workflowId: '7669706474775838747',
             token: 'pat_RLzQwUwV4EZfYm3mZiPWw3gFkoCYKYiux8bnKi9UxLxTWormmRTcDANJU1rOMenK'
         };
-
         // 保存训练记录到扣子平台数据表
         async function saveToCozeDB(record) {
             try {
@@ -2128,7 +2104,6 @@ function toggleDebug() {
                         }
                     })
                 });
-
                 if (response.ok) {
                     console.log('✅ 训练记录已保存到扣子平台');
                     return true;
@@ -2141,7 +2116,6 @@ function toggleDebug() {
                 return false;
             }
         }
-
         async function saveTrainingRecord(record) {
             if (!db) await initDB();
             
@@ -2154,10 +2128,8 @@ function toggleDebug() {
                 request.onsuccess = () => resolve(request.result);
                 request.onerror = () => reject(request.error);
             });
-
             // 同时保存到扣子平台数据表
             const cozeSave = saveToCozeDB(record);
-
             try {
                 await Promise.all([localSave, cozeSave]);
                 return record;
@@ -2186,6 +2158,7 @@ function toggleDebug() {
             if (!db) await initDB();
             
             return new Promise((resolve, reject) => {
+
                 const transaction = db.transaction([STORE_NAME], 'readwrite');
                 const objectStore = transaction.objectStore(STORE_NAME);
                 const request = objectStore.delete(id);
@@ -2558,6 +2531,7 @@ function toggleDebug() {
             // 绘制数据点
             angleData.forEach((d, i) => {
                 const x = padding.left + stepX * i;
+
                 
                 // 髋关节点
                 const hipY = padding.top + chartHeight - (d.avgHip / 180) * chartHeight;
@@ -2879,7 +2853,6 @@ function toggleDebug() {
                 modal.style.display = 'none';
             }
         };
-
         // 初始化
         initPoseLandmarker();
         initDB(); // 初始化数据库
@@ -2909,6 +2882,7 @@ function toggleDebug() {
                 <!-- 训练记录标签页 -->
                 <div id="recordsTab" class="tab-content active">
                     <div id="recordsList"></div>
+
                 </div>
                 
                 <!-- 康复进度标签页 -->
@@ -2991,3 +2965,4 @@ function toggleDebug() {
     </div>
 </body>
 </html>
+
