@@ -1712,7 +1712,7 @@ function toggleDebug() {
                 
                 if (fullContent) {
                 // 自动提交训练记录到数据库
-                const trainingDuration = Math.floor((Date.now() - startTime) / 1000);
+                const trainingDuration = Math.floor((Date.now() - analysisStartTime) / 1000);
                 console.log('开始保存训练记录...');
                 window.autoSubmitTrainingRecord('康复动作分析', trainingDuration, fullContent);
                     // 尝试美化显示
@@ -1816,6 +1816,11 @@ function toggleDebug() {
             }
             if (typeof data !== 'object') {
                 return `<div class="analysis-card"><div class="content">${escapeHtml(String(data))}</div></div>`;
+            }
+            
+            // 处理 reply 字段（工作流返回格式）
+            if (data.reply) {
+                return formatMarkdownResult(data.reply);
             }
             
             let html = '';
