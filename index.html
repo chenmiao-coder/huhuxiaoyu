@@ -979,9 +979,9 @@
             }
         }
     </style>
-<button id="debugBtn" onclick="toggleDebug()" style="position:fixed;bottom:20px;right:20px;z-index:999;background:#9c27b0;color:white;border:none;padding:10px 20px;border-radius:25px;font-size:14px;cursor:pointer;box-shadow:0 4px 12px rgba(156,39,176,0.4);"> 调试</button>
+<button id="debugBtn" onclick="toggleDebug()" style="position:fixed;top:10px;right:10px;z-index:1000;background:#9c27b0;color:white;border:none;padding:8px 15px;border-radius:5px;font-size:14px;cursor:pointer;">调试</button>
 
-<div id="debugInfo" style="position:fixed;bottom:70px;right:20px;z-index:998;width:350px;max-height:250px;overflow-y:auto;background:rgba(26,26,26,0.95);border:2px solid #9c27b0;border-radius:10px;padding:10px;font-family:monospace;font-size:12px;display:block;"></div>
+<div id="debugInfo" style="display:none;position:fixed;top:50px;right:10px;z-index:1000;width:400px;max-height:300px;overflow-y:auto;background:#1a1a1a;border:2px solid #9c27b0;border-radius:10px;padding:10px;"></div>
 
 <script>
 function toggleDebug() {
@@ -1012,12 +1012,12 @@ function toggleDebug() {
             </div>
             <div class="config-group">
                 <label>工作流 ID</label>
-                <input type="text" id="workflowId" value="7669706474775838747" readonly style="opacity:0.6;cursor:not-allowed;">
+                <input type="text" id="workflowId" value="7656444733648240694" readonly style="opacity:0.6;cursor:not-allowed;">
             </div>
             <button class="btn btn-primary btn-save" onclick="alert('配置已内置，无需修改')" style="opacity:0.5;cursor:not-allowed;">💾 保存配置</button>
             
             <h3 style="margin-top:20px;">📹 视频源</h3>
-            <input type="file" id="videoInput" accept="video/*" style="position:absolute;opacity:0;width:1px;height:1px;pointer-events:none;" onchange="handleFileUpload(event)" tabindex="-1">
+            <input type="file" id="videoInput" accept="video/*" style="position:absolute;opacity:0;width:0;height:0;pointer-events:none;" onchange="handleFileUpload(event)" tabindex="-1">
             <button class="btn btn-secondary" onclick="triggerVideoUpload()">📁 上传视频</button>
             <button class="btn btn-secondary" onclick="startCamera()">📷 使用摄像头</button>
             
@@ -1459,7 +1459,7 @@ function toggleDebug() {
         }
         
         // 自动提交训练记录到 Supabase
-        window.submitTrainingRecord = async function() {
+            
             if (!TRAINING_RECORD_API_URL || TRAINING_RECORD_API_URL === 'YOUR_API_SERVICE_URL') {
                 console.log('训练记录 API 未配置，跳过自动提交');
                 return;
@@ -1598,8 +1598,8 @@ function toggleDebug() {
             `;
             
             const apiUrl = 'https://api.coze.cn/v1/workflow/stream_run'; // 硬编码，不从输入框读取
-            const apiToken = 'pat_wUAWsHqO8HYNH742HDcTMtZdGf488pzJ0eU1Ual9wEW5AwSFrEm5d7YZ5tRheJaX'; // 硬编码
-            const workflowId = '7656444733648240694'; // AI 康复分析工作流 ID（硬编码）
+            const apiToken = 'pat_wUAWsHqO8HYNH742HDcTMtZdGf488pzJ0eU1Ual9wEW5AwSFrEm5d7YZ5tRheJaX';
+            const workflowId = document.getElementById('workflowId').value;
             
             if (!apiToken) {
                 resultDiv.innerHTML = `
@@ -2163,67 +2163,40 @@ function toggleDebug() {
             token: 'pat_RLzQwUwV4EZfYm3mZiPWw3gFkoCYKYiux8bnKi9UxLxTWormmRTcDANJU1rOMenK'
         };
 
-        // 调试日志函数
-        function logToDebug(message, type = 'info') {
-            const debugDiv = document.getElementById('debugInfo');
-            if (debugDiv) {
-                const time = new Date().toLocaleTimeString();
-                const color = type === 'error' ? '#ff4444' : type === 'success' ? '#44ff44' : '#ffffff';
-                debugDiv.innerHTML += `<div style="color:${color};margin:5px 0;font-size:12px;">[${time}] ${message}</div>`;
-                debugDiv.scrollTop = debugDiv.scrollHeight;
-            }
-            console.log(message);
-        }
-
         // 保存训练记录到扣子平台数据表
         async function saveToCozeDB(record) {
             try {
-                logToDebug('📤 开始保存训练记录到扣子平台...', 'info');
-                logToDebug(`📊 数据：${JSON.stringify(record)}`, 'info');
-                
-                const requestBody = {
-                    workflow_id: COZE_API_CONFIG.workflowId,
-                    parameters: {
-                        user_id: record.userId || 'anonymous_' + Date.now(),
-                        training_content: record.trainingContent || record.actionType || '未记录',
-                        training_duration: String(record.duration || record.frameCount || 0),
-                        agent_reply: record.agentReply || record.analysisContent || '',
-                        device_info: JSON.stringify({
-                            screen: `${window.screen.width}x${window.screen.height}`,
-                            language: navigator.language,
-                            userAgent: navigator.userAgent.substring(0, 100)
-                        })
-                    }
-                };
-                
-                logToDebug(`🔗 API: ${COZE_API_CONFIG.apiUrl}`, 'info');
-                logToDebug(`🆔 工作流 ID: ${COZE_API_CONFIG.workflowId}`, 'info');
-                
                 const response = await fetch(COZE_API_CONFIG.apiUrl, {
                     method: 'POST',
                     headers: {
                         'Authorization': `Bearer ${COZE_API_CONFIG.token}`,
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify(requestBody)
+                    body: JSON.stringify({
+                        workflow_id: COZE_API_CONFIG.workflowId,
+                        parameters: {
+                            user_id: record.userId || 'anonymous_' + Date.now(),
+                            training_content: record.trainingContent || record.actionType || '未记录',
+                            training_duration: String(record.duration || record.frameCount || 0),
+                            agent_reply: record.agentReply || record.analysisContent || '',
+                            device_info: JSON.stringify({
+                                screen: `${window.screen.width}x${window.screen.height}`,
+                                language: navigator.language,
+                                userAgent: navigator.userAgent.substring(0, 100)
+                            })
+                        }
+                    })
                 });
 
-                logToDebug(`📥 响应状态：${response.status}`, response.ok ? 'success' : 'error');
-                
                 if (response.ok) {
-                    const result = await response.text();
-                    logToDebug(`✅ 训练记录已保存到扣子平台`, 'success');
-                    logToDebug(`📄 响应：${result.substring(0, 200)}`, 'info');
+                    console.log('✅ 训练记录已保存到扣子平台');
                     return true;
                 } else {
-                    const errorText = await response.text();
-                    logToDebug(`❌ 保存到扣子平台失败：${response.status}`, 'error');
-                    logToDebug(`📄 错误：${errorText}`, 'error');
+                    console.error('❌ 保存到扣子平台失败:', response.status);
                     return false;
                 }
             } catch (error) {
-                logToDebug(`❌ 调用扣子 API 错误：${error.message}`, 'error');
-                logToDebug(`📄 堆栈：${error.stack}`, 'error');
+                console.error('❌ 调用扣子 API 错误:', error);
                 return false;
             }
         }
