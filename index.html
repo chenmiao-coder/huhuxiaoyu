@@ -1087,6 +1087,7 @@ function toggleDebug() {
         // ========== 全局状态 ==========
         let poseLandmarker = null;
         let videoElement = null;
+        let currentVideoType = '';
         let canvasElement = null;
         let canvasCtx = null;
         let animationFrameId = null;
@@ -1166,6 +1167,7 @@ function toggleDebug() {
             try {
                 const url = URL.createObjectURL(file);
                 console.log('创建视频 URL:', url);
+                currentVideoType = 'upload';
                 await setupVideo(url);
                 console.log('视频加载成功');
                 
@@ -1180,6 +1182,7 @@ function toggleDebug() {
             }
         };
         window.startCamera = async function() {
+            currentVideoType = 'camera';
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ 
                     video: { width: 640, height: 480 } 
@@ -1759,7 +1762,7 @@ function toggleDebug() {
                     }
                     
                     // 保存文本用于语音播报
-                    currentResultText = fullContent;
+                    currentResultText = replyText;
                     
                     // 显示语音播报按钮
                     const speakBtn = document.getElementById('speakBtn');
