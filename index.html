@@ -1711,10 +1711,20 @@ function toggleDebug() {
               
                 
                 if (fullContent) {
-                // 自动提交训练记录到数据库
-                const trainingDuration = Math.floor((Date.now() - analysisStartTime) / 1000);
-                console.log('开始保存训练记录...');
-                window.autoSubmitTrainingRecord('康复动作分析', trainingDuration, fullContent);
+                    // 解析实际回复文本
+                    let replyText = fullContent;
+                    let actionName = currentVideoType || '康复训练';
+                    try {
+                        const parsed = JSON.parse(fullContent);
+                        if (parsed.reply) {
+                            replyText = parsed.reply;
+                        }
+                    } catch(e) {}
+                    
+                    const trainingDuration = Math.floor((Date.now() - analysisStartTime) / 1000);
+                    console.log('开始保存训练记录...');
+                    window.autoSubmitTrainingRecord(actionName, trainingDuration, replyText);
+                    
                     // 尝试美化显示
                     try {
                         const parsed = JSON.parse(fullContent);
@@ -1723,13 +1733,13 @@ function toggleDebug() {
                         // 保存训练记录
                         await saveTrainingRecord({
                             timestamp: Date.now(),
-                            actionType: parsed.识别动作 || parsed.action_type || '未识别',
-                            result: parsed.评估结果 || parsed.result || 'unknown',
+                            actionType: actionName,
+                            result: 'completed',
                             frameCount: analysisData.frames.length,
                             dangerCount: analysisData.frames.filter(f => 
                                 f.leftHip < 90 || f.rightHip < 90 || f.leftKnee < 60 || f.rightKnee < 60
                             ).length,
-                            analysisContent: fullContent,
+                            analysisContent: replyText,
                             videoAnalysis: lastAnalysisData
                         });
                     } catch {
@@ -1739,11 +1749,11 @@ function toggleDebug() {
                         // 保存训练记录（Markdown 格式）
                         await saveTrainingRecord({
                             timestamp: Date.now(),
-                            actionType: '未识别',
-                            result: 'unknown',
+                            actionType: actionName,
+                            result: 'completed',
                             frameCount: analysisData.frames.length,
                             dangerCount: 0,
-                            analysisContent: fullContent,
+                            analysisContent: replyText,
                             videoAnalysis: lastAnalysisData
                         });
                     }
